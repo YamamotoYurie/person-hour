@@ -1,0 +1,123 @@
+// Container
+
+@mixin container {
+  max-width: #{$container};
+  @include padding($cont-padding auto);
+  position: relative;
+
+  @media #{$sp} {
+    @include padding($cont-padding-sp 10px);
+  }
+}
+
+
+// Clear fix （Bourbon には入っているけど、念のために）
+
+@mixin clearfix {
+  &::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}
+
+
+// Hover opacitiy for links ( just so they're all the same )
+
+@mixin hoverlink {
+  transition: 0.2s ease-in-out;
+  backface-visibility: hidden;
+  cursor: pointer;
+  &:hover {
+    opacity: 0.7;
+  }
+  &::before,
+  &::after {
+    backface-visibility: hidden;
+  }
+}
+
+
+//z-index: z(bg);
+$z-map: (
+  bg,
+  box,
+  pagetop,
+  header,
+  nav,
+  nav-btn
+);
+
+@function z($name) {
+  @return index($z-map, $name);
+}
+
+
+
+// Fontsize change by viewport
+@function get_vw($size, $viewport: $pc-width) {
+  @return calc(100 / $viewport) * $size * 1vw;
+}
+@mixin fz_vw($font_size: 10) {
+  font-size: $font_size + px;
+  font-size: get_vw($font_size);
+  @media #{$sp} {
+    font-size: get_vw($font_size, $sp-width);
+  }
+  @media #{$max} {
+    font-size: $font_size + px;
+  }
+}
+$properties: (
+  "p": "padding",
+  "pt": "padding-top",
+  "pl": "padding-left",
+  "pb": "padding-bottom",
+  "pr": "padding-right",
+  "m": "margin",
+  "mt": "margin-top",
+  "ml": "margin-left",
+  "mb": "margin-bottom",
+  "mr": "margin-right",
+  "w": "width",
+  "h": "height",
+  "t": "top",
+  "l": "left",
+  "b": "bottom",
+  "r": "right",
+  "g": "gap",
+  "cg": "column-gap",
+  "rg": "row-gap",
+  "maxw": "max-width",
+  "minw": "min-width",
+  "maxh": "max-height",
+  "minh": "min-height",
+) !default;
+@mixin props($property, $size, $parent_width: $pc-width) {
+  @if ($property== "h") {
+    height: calc($size / $parent-width) * 100vw;
+    max-height: $size + px;
+    @media #{$sp} {
+      $parent_width: $sp-width;
+      height: calc($size / $parent-width) * 100vw;
+      max-height: $size + px;
+    }
+  } @else if($property== "w") {
+    width: calc($size / $parent-width) * 100vw;
+    max-width: $size + px;
+    @media #{$sp} {
+      $parent_width: $sp-width;
+      width: calc($size / $parent-width) * 100vw;
+      max-width: $size + px;
+    }
+  } @else {
+    #{map-get($properties, $property)}: calc($size / $parent-width) * 100vw;
+    @media #{$max} {
+      #{map-get($properties, $property)}: $size + px;
+    }
+    @media #{$sp} {
+      $parent_width: $sp-width;
+      #{map-get($properties, $property)}: calc($size / $parent-width) * 100vw;
+    }
+  }
+}

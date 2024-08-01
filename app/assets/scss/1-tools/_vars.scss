@@ -1,0 +1,38 @@
+// Breakpoint設定
+
+$sp-width: 750;
+$pc-width: 1394;
+
+$sp: "all and (max-width : 768px)";
+$pc: "all and (min-width: 769px)";
+$max: "all and (min-width: #{$pc-width}px)";
+
+/*
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+*/
+
+$font-family: 'Noto Sans JP','ヒラギノ角ゴ Pro W3','Hiragino Kaku Gothic Pro','游ゴシック','Yu Gothic','游ゴシック体','YuGothic','ＭＳ Ｐゴシック','MS PGothic',sans-serif;
+
+// カラー
+
+$primary-color: #000;
+$secondary-color: #ccc;
+$tertiary-color: #eee;
+
+
+// テキストカラー
+
+$black : #333;
+
+// コンテナー設定
+
+$container: 1200px;
+$cont-padding: 60px;
+$cont-padding-sp: 30px;
+
+// グリッド設定
+
+$gutter: 20px;
+$small-gutter: 10px;
