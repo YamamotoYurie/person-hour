@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作業記録</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        #taskInfo {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #taskInfo div {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>作業記録</h1>
+    <div id="loginForm">
+        <input type="text" id="username" placeholder="ユーザー名" required>
+        <input type="password" id="password" placeholder="パスワード" required>
+        <button onclick="login()">ログイン</button>
+    </div>
+    <div id="taskControls" class="hidden">
+        <div id="taskInfo">
+            <div id="projectNo"></div>
+            <div id="projectName"></div>
+            <div id="clientName"></div>
+            <div id="contactName"></div>
+        </div>
+        <button id="startButton">START</button>
+        <button id="stopButton">STOP</button>
+    </div>
+
+    <script>
+        let token;
+        const projectNo = window.location.pathname.split('/').pop();
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (data.token) {
+                    token = data.token;
+                    document.getElementById('loginForm').classList.add('hidden');
+                    document.getElementById('taskControls').classList.remove('hidden');
+                    await fetchAndDisplayProjectInfo();
+                } else {
+                    alert('ログインに失敗しました');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('ログイン中にエラーが発生しました');
+            }
+        }
+
+        async function fetchAndDisplayProjectInfo() {
+            try {
+                const response = await fetch(`/api/board/${projectNo}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const projectInfo = await response.json();
+                document.getElementById('projectNo').textContent = `案件No: ${projectNo}`;
+                document.getElementById('projectName').textContent = `案件名: ${projectInfo.projectName}`;
+                document.getElementById('clientName').textContent = `クライアント名: ${projectInfo.clientName}`;
+                document.getElementById('contactName').textContent = `担当者名: ${projectInfo.contactName}`;
+            } catch (error) {
+                console.error('Error fetching project info:', error);
+                alert('プロジェクト情報の取得に失敗しました');
+            }
+        }
+
+        document.getElementById('startButton').addEventListener('click', async () => {
+            await sendTaskAction('start');
+        });
+
+        document.getElementById('stopButton').addEventListener('click', async () => {
+            await sendTaskAction('stop');
+        });
+
+        async function sendTaskAction(action) {
+            try {
+                const res = await fetch(`/api/task-${action}`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ taskId: projectNo })
+                });
+                const data = await res.json();
+                alert(data.message);
+            } catch (error) {
+                console.error(`Task ${action} error:`, error);
+                alert(`タスクの${action === 'start' ? '開始' : '停止'}中にエラーが発生しました`);
+            }
+        }
+
+        // ページロード時にトークンをチェック
+        window.addEventListener('load', () => {
+            const savedToken = localStorage.getItem('token');
+            if (savedToken) {
+                token = savedToken;
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('taskControls').classList.remove('hidden');
+                fetchAndDisplayProjectInfo();
+            }
+        });
+    </script>
+</body>
+</html>
